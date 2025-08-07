@@ -5,9 +5,10 @@ import { apiService, Project, Skill, Experience, Contact } from '../services/api
 
 interface AdminDashboardProps {
   onLogout: () => void;
+  onBackToPortfolio: () => void;
 }
 
-const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
+const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onBackToPortfolio }) => {
   const [activeTab, setActiveTab] = useState<'projects' | 'skills' | 'experiences' | 'contacts'>('projects');
   const [projects, setProjects] = useState<Project[]>([]);
   const [skills, setSkills] = useState<Skill[]>([]);
@@ -83,13 +84,21 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               Portfolio Admin Dashboard
             </h1>
-            <button
-              onClick={handleLogout}
-              className="flex items-center px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </button>
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={onBackToPortfolio}
+                className="flex items-center px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              >
+                ← Back to Portfolio
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex items-center px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </button>
+            </div>
           </div>
         </div>
       </header>

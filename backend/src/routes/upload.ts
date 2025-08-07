@@ -1,5 +1,5 @@
-import express from 'express';
-import multer from 'multer';
+import express, { Request, Response } from 'express';
+import multer, { FileFilterCallback } from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { protect, admin } from '../middleware/auth';
@@ -14,80 +14,97 @@ if (!fs.existsSync(uploadDir)) {
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
+  destination: (_req, _file, cb) => {
     cb(null, uploadDir);
   },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+  filename: (_req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
   }
 });
 
-const fileFilter = (req: any, file: any, cb: any) => {
-  // Accept images only
+// File filter to accept only images
+const fileFilter = (
+  _req: Request,
+  file: Express.Multer.File,
+  cb: FileFilterCallback
+) => {
   if (file.mimetype.startsWith('image/')) {
     cb(null, true);
   } else {
-    cb(new Error('Only image files are allowed!'), false);
+    cb(new Error('Only image files are allowed!'));
   }
 };
 
 const upload = multer({
-  storage: storage,
+  storage,
   limits: {
-    fileSize: parseInt(process.env.MAX_FILE_SIZE || '5242880') // 5MB default
+    fileSize: parseInt(process.env.MAX_FILE_SIZE || '5242880', 10) // 5MB default
   },
-  fileFilter: fileFilter
+  fileFilter
 });
 
 // @desc    Upload image
 // @route   POST /api/upload/image
 // @access  Private/Admin
-router.post('/image', protect, admin, upload.single('image'), (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ success: false, error: 'No file uploaded' });
-    }
-
-    const fileUrl = `/uploads/${req.file.filename}`;
-
-    res.json({
-      success: true,
-      data: {
-        filename: req.file.filename,
-        originalname: req.file.originalname,
-        url: fileUrl,
-        size: req.file.size
+router.post(
+  '/image',
+  protect,
+  admin,
+  upload.single('image'),
+  (req: Request, res: Response) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ success: false, error: 'No file uploaded' });
       }
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, error: 'Server error' });
+
+      const fileUrl = `/uploads/${req.file.filename}`;
+
+      return res.json({
+        success: true,
+        data: {
+          filename: req.file.filename,
+          originalname: req.file.originalname,
+          url: fileUrl,
+          size: req.file.size
+        }
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ success: false, error: 'Server error' });
+    }
   }
-});
+);
 
 // @desc    Delete uploaded file
 // @route   DELETE /api/upload/:filename
 // @access  Private/Admin
-router.delete('/:filename', protect, admin, (req, res) => {
-  try {
-    const filename = req.params.filename;
-    const filepath = path.join(uploadDir, filename);
+router.delete(
+  '/:filename',
+  protect,
+  admin,
+  (req: Request, res: Response) => {
+    try {
+      const filename = req.params.filename;
+      const filepath = path.join(uploadDir, filename);
 
-    if (fs.existsSync(filepath)) {
-      fs.unlinkSync(filepath);
-      res.json({
-        success: true,
-        message: 'File deleted successfully'
-      });
-    } else {
-      res.status(404).json({
-        success: false,
-        error: 'File not found'
-      });
+      if (fs.existsSync(filepath)) {
+        fs.unlinkSync(filepath);
+        return res.json({
+          success: true,
+          message: 'File deleted successfully'
+        });
+      } else {
+        return res.status(404).json({
+          success: false,
+          error: 'File not found'
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ success: false, error: 'Server error' });
     }
-  } catch (error) {
-    res.status(500).json({ success: false, error: 'Server error' });
   }
-});
+);
 
-export default router; 
+export default router;

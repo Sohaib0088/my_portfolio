@@ -3,7 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Moon, Sun } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
-const Navigation: React.FC = () => {
+interface NavigationProps {
+  onAdminClick: () => void;
+  isLoggedIn: boolean;
+}
+
+const Navigation: React.FC<NavigationProps> = ({ onAdminClick, isLoggedIn }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
   const [scrolled, setScrolled] = useState(false);
@@ -99,6 +104,32 @@ const Navigation: React.FC = () => {
               </motion.button>
             ))}
             
+            {isLoggedIn ? (
+              <motion.button
+                onClick={onAdminClick}
+                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg hover:scale-105 transition-all duration-300"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.7 }}
+              >
+                Admin
+              </motion.button>
+            ) : (
+              <motion.button
+                onClick={onAdminClick}
+                className="px-4 py-2 bg-gradient-to-r from-green-600 to-blue-600 text-white font-medium rounded-lg hover:scale-105 transition-all duration-300"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.7 }}
+              >
+                Login
+              </motion.button>
+            )}
+            
             <motion.button
               onClick={toggleTheme}
               className="p-3 rounded-full bg-gray-100/80 dark:bg-gray-800/80 backdrop-blur-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-all duration-300 hover:scale-110"
@@ -108,7 +139,7 @@ const Navigation: React.FC = () => {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.8 }}
             >
-              <AnimatePresence mode="wait">
+              <AnimatePresence>
                 {isDark ? (
                   <motion.div
                     key="sun"
@@ -150,7 +181,7 @@ const Navigation: React.FC = () => {
               className="p-2 rounded-md text-gray-700 dark:text-gray-300"
               whileTap={{ scale: 0.95 }}
             >
-              <AnimatePresence mode="wait">
+              <AnimatePresence>
                 {isMenuOpen ? (
                   <motion.div
                     key="close"
@@ -205,6 +236,22 @@ const Navigation: React.FC = () => {
                     {item.label}
                   </motion.button>
                 ))}
+                
+                {/* Login/Admin Button for Mobile */}
+                <motion.button
+                  onClick={onAdminClick}
+                  className={`block w-full text-left px-4 py-3 text-base font-medium rounded-lg transition-all duration-300 ${
+                    isLoggedIn
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                      : 'bg-gradient-to-r from-green-600 to-blue-600 text-white'
+                  }`}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: navItems.length * 0.1 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  {isLoggedIn ? 'Admin' : 'Login'}
+                </motion.button>
               </div>
             </motion.div>
           )}

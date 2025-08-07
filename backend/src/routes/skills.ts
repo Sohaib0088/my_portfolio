@@ -15,7 +15,6 @@ router.get('/', async (req, res) => {
 
     res.json({
       success: true,
-      count: skills.length,
       data: skills
     });
   } catch (error) {

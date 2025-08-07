@@ -1,5 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
@@ -15,7 +15,7 @@ model User {
   email     String   @unique
   password  String
   name      String
-  role      String   @default("USER")
+  role      String   @default("user") // Enum removed, using string instead
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -23,17 +23,17 @@ model User {
 }
 
 model Project {
-  id          String   @id @default(cuid())
-  title       String
-  description String
-  imageUrl    String?
-  githubUrl   String?
-  liveUrl     String?
-  technologies String  // JSON string of technologies
-  featured    Boolean  @default(false)
-  order       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(cuid())
+  title        String
+  description  String
+  imageUrl     String?
+  githubUrl    String?
+  liveUrl      String?
+  technologies String   // JSON string of technologies
+  featured     Boolean  @default(false)
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@map("projects")
 }
@@ -42,7 +42,7 @@ model Skill {
   id        String   @id @default(cuid())
   name      String   @unique
   category  String
-  level     Int      @default(1) // 1-5 scale
+  level     Int      @default(1) // 1–5 scale
   icon      String?
   order     Int      @default(0)
   createdAt DateTime @default(now())
@@ -52,18 +52,18 @@ model Skill {
 }
 
 model Experience {
-  id          String   @id @default(cuid())
-  title       String
-  company     String
-  location    String?
-  startDate   DateTime
-  endDate     DateTime?
-  current     Boolean  @default(false)
-  description String
+  id           String   @id @default(cuid())
+  title        String
+  company      String
+  location     String?
+  startDate    DateTime
+  endDate      DateTime?
+  current      Boolean  @default(false)
+  description  String
   technologies String? // JSON string of technologies
-  order       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@map("experiences")
 }
@@ -82,16 +82,24 @@ model Contact {
 }
 
 model About {
-  id          String   @id @default(cuid())
-  title       String
-  content     String
-  imageUrl    String?
-  order       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  imageUrl  String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("abouts")
 }
 
-// Role values: "USER", "ADMIN"
-// SkillCategory values: "FRONTEND", "BACKEND", "DATABASE", "DEVOPS", "TOOLS", "LANGUAGES" 
+model OTP {
+  id        String   @id @default(cuid())
+  email     String
+  otp       String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("otps")
+}

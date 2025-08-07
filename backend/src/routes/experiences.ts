@@ -15,10 +15,10 @@ router.get('/', async (req, res) => {
 
     res.json({
       success: true,
-      count: experiences.length,
       data: experiences
     });
   } catch (error) {
+    console.error('Get experiences error:', error);
     res.status(500).json({ success: false, error: 'Server error' });
   }
 });

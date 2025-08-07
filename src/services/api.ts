@@ -1,3 +1,5 @@
+// ✅ Final cleaned-up and corrected version of your ApiService file
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 interface ApiResponse<T> {
@@ -79,11 +81,9 @@ interface AuthResponse {
 
 class ApiService {
   private baseUrl: string;
-  private token: string | null;
 
   constructor() {
     this.baseUrl = API_BASE_URL;
-    this.token = localStorage.getItem('token');
   }
 
   private async request<T>(
@@ -91,16 +91,17 @@ class ApiService {
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`;
-    
+
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(options.headers as Record<string, string>),
     };
 
-    if (this.token) {
-      headers.Authorization = `Bearer ${this.token}`;
+    const token = localStorage.getItem('token');
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
     }
-
+    
     try {
       const response = await fetch(url, {
         ...options,
@@ -126,12 +127,11 @@ class ApiService {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
-    
+
     if (response.success && response.data.token) {
-      this.token = response.data.token;
       localStorage.setItem('token', response.data.token);
     }
-    
+
     return response.data;
   }
 
@@ -140,12 +140,11 @@ class ApiService {
       method: 'POST',
       body: JSON.stringify({ name, email, password }),
     });
-    
+
     if (response.success && response.data.token) {
-      this.token = response.data.token;
       localStorage.setItem('token', response.data.token);
     }
-    
+
     return response.data;
   }
 
@@ -154,8 +153,28 @@ class ApiService {
   }
 
   logout() {
-    this.token = null;
     localStorage.removeItem('token');
+  }
+
+  async requestOTP(email: string, password: string): Promise<{ message: string }> {
+    const response = await this.request<{ message: string }>('/auth/request-otp', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+    return response.data;
+  }
+
+  async verifyOTP(email: string, otp: string): Promise<AuthResponse> {
+    const response = await this.request<AuthResponse>('/auth/verify-otp', {
+      method: 'POST',
+      body: JSON.stringify({ email, otp }),
+    });
+
+    if (response.success && response.data.token) {
+      localStorage.setItem('token', response.data.token);
+    }
+
+    return response.data;
   }
 
   // Projects
@@ -186,9 +205,7 @@ class ApiService {
   }
 
   async deleteProject(id: string): Promise<void> {
-    await this.request(`/projects/${id}`, {
-      method: 'DELETE',
-    });
+    await this.request(`/projects/${id}`, { method: 'DELETE' });
   }
 
   // Skills
@@ -214,9 +231,7 @@ class ApiService {
   }
 
   async deleteSkill(id: string): Promise<void> {
-    await this.request(`/skills/${id}`, {
-      method: 'DELETE',
-    });
+    await this.request(`/skills/${id}`, { method: 'DELETE' });
   }
 
   // Experience
@@ -242,9 +257,7 @@ class ApiService {
   }
 
   async deleteExperience(id: string): Promise<void> {
-    await this.request(`/experiences/${id}`, {
-      method: 'DELETE',
-    });
+    await this.request(`/experiences/${id}`, { method: 'DELETE' });
   }
 
   // About
@@ -270,9 +283,7 @@ class ApiService {
   }
 
   async deleteAbout(id: string): Promise<void> {
-    await this.request(`/about/${id}`, {
-      method: 'DELETE',
-    });
+    await this.request(`/about/${id}`, { method: 'DELETE' });
   }
 
   // Contact
@@ -297,9 +308,7 @@ class ApiService {
   }
 
   async deleteContact(id: string): Promise<void> {
-    await this.request(`/contacts/${id}`, {
-      method: 'DELETE',
-    });
+    await this.request(`/contacts/${id}`, { method: 'DELETE' });
   }
 
   // File Upload
@@ -307,21 +316,19 @@ class ApiService {
     const formData = new FormData();
     formData.append('image', file);
 
-    const url = `${this.baseUrl}/upload/image`;
-    
+    const token = localStorage.getItem('token');
     const headers: HeadersInit = {};
-    if (this.token) {
-      headers.Authorization = `Bearer ${this.token}`;
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
     }
 
-    const response = await fetch(url, {
+    const response = await fetch(`${this.baseUrl}/upload/image`, {
       method: 'POST',
       headers,
       body: formData,
     });
 
     const data = await response.json();
-
     if (!response.ok) {
       throw new Error(data.error || 'Upload failed');
     }
@@ -337,4 +344,4 @@ class ApiService {
 }
 
 export const apiService = new ApiService();
-export type { Project, Skill, Experience, About, Contact, AuthResponse }; 
+export type { Project, Skill, Experience, About, Contact, AuthResponse };
