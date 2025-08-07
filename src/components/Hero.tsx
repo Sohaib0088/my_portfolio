@@ -11,8 +11,6 @@ const Hero: React.FC = () => {
         className="max-w-3xl mx-auto px-6"
       >
         <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-6">
-          
-          
           Sohaib Khan
         </h1>
         <p className="text-xl md:text-2xl text-gray-700 dark:text-gray-300 mb-8">

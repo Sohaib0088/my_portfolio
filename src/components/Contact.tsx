@@ -63,30 +63,30 @@ const Contact: React.FC = () => {
     {
       icon: Mail,
       title: 'Email',
-      content: 'john.doe@example.com',
-      href: 'mailto:john.doe@example.com',
+      content: 'sohaib021222@gmail.com',
+      href: 'mailto:sohaib021222@gmail.com',
       color: 'from-blue-500 to-cyan-500'
     },
     {
       icon: Phone,
       title: 'Phone',
-      content: '+1 (555) 123-4567',
-      href: 'tel:+15551234567',
+      content: '+92 3554962652',
+      href: 'tel:+923554962652',
       color: 'from-green-500 to-emerald-500'
     },
     {
       icon: MapPin,
       title: 'Location',
-      content: 'San Francisco, CA',
+      content: 'Islamaabad, Pakistan',
       href: '#',
       color: 'from-purple-500 to-pink-500'
     }
   ];
 
   const socialLinks = [
-    { icon: Github, href: '#', label: 'GitHub', color: 'hover:text-gray-900 dark:hover:text-white' },
-    { icon: Linkedin, href: '#', label: 'LinkedIn', color: 'hover:text-blue-600' },
-    { icon: Twitter, href: '#', label: 'Twitter', color: 'hover:text-blue-400' },
+    { icon: Github, href: 'https://github.com/Sohaib0088', label: 'GitHub', color: 'hover:text-gray-900 dark:hover:text-white' },
+    { icon: Linkedin, href: 'https://www.linkedin.com/in/sohaib-khan8/', label: 'LinkedIn', color: 'hover:text-blue-600' },
+    { icon: Twitter, href: 'https://x.com/sohaib021222', label: 'Twitter', color: 'hover:text-blue-400' },
   ];
 
   const containerVariants = {

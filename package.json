@@ -5,9 +5,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:full": "concurrently \"npm run dev\" \"npm run dev:backend\"",
     "build": "vite build",
+    "build:backend": "cd backend && npm run build",
+    "build:full": "npm run build && npm run build:backend",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "setup": "node setup.js",
+    "setup:backend": "cd backend && npm install && npm run db:generate && npm run db:migrate && npx ts-node prisma/seed.ts",
+    "start:backend": "cd backend && npm start"
   },
   "dependencies": {
     "framer-motion": "^12.23.12",
@@ -21,6 +28,7 @@
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.18",
+    "concurrently": "^8.2.2",
     "eslint": "^9.9.1",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.11",
