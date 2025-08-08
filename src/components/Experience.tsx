@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { MapPin, Calendar, Building, GraduationCap, Award, Briefcase } from 'lucide-react';
+import { apiService, Experience as ApiExperience } from '../services/api';
 
 interface ExperienceItem {
-  id: number;
+  id: string;
   type: 'work' | 'education';
   title: string;
   company: string;
@@ -18,83 +19,40 @@ const Experience: React.FC = () => {
   const ref = React.useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
-  const experiences: ExperienceItem[] = [
-    {
-      id: 1,
-      type: 'work',
-      title: 'Senior Full Stack Developer',
-      company: 'TechCorp Solutions',
-      location: 'San Francisco, CA',
-      period: '2022 - Present',
-      description: 'Lead development of scalable web applications serving 100k+ users. Implemented microservices architecture and improved system performance by 40%. Mentored junior developers and established coding standards.',
-      technologies: ['React', 'Node.js', 'AWS', 'TypeScript', 'PostgreSQL'],
-      achievements: [
-        'Reduced application load time by 60%',
-        'Led team of 5 developers',
-        'Implemented CI/CD pipeline'
-      ]
-    },
-    {
-      id: 2,
-      type: 'work',
-      title: 'Full Stack Developer',
-      company: 'StartupHub Inc.',
-      location: 'Austin, TX',
-      period: '2020 - 2022',
-      description: 'Developed and maintained multiple client projects ranging from e-commerce platforms to data visualization dashboards. Collaborated with cross-functional teams to deliver high-quality solutions on time.',
-      technologies: ['Vue.js', 'Python', 'Django', 'MongoDB', 'Docker'],
-      achievements: [
-        'Delivered 15+ client projects',
-        'Improved code coverage to 90%',
-        'Reduced deployment time by 50%'
-      ]
-    },
-    {
-      id: 3,
-      type: 'education',
-      title: 'Master of Science in Computer Science',
-      company: 'University of Technology',
-      location: 'Boston, MA',
-      period: '2017 - 2019',
-      description: 'Specialized in Software Engineering and Machine Learning. Completed thesis on "Optimizing Web Application Performance Using Modern JavaScript Frameworks". GPA: 3.8/4.0',
-      technologies: ['Algorithms', 'Data Structures', 'Machine Learning', 'Software Engineering'],
-      achievements: [
-        'Magna Cum Laude',
-        'Research Assistant',
-        'Published 2 papers'
-      ]
-    },
-    {
-      id: 4,
-      type: 'work',
-      title: 'Frontend Developer',
-      company: 'Creative Agency Co.',
-      location: 'Remote',
-      period: '2019 - 2020',
-      description: 'Specialized in creating responsive, interactive websites for creative clients. Worked closely with designers to bring innovative concepts to life while ensuring optimal user experience across all devices.',
-      technologies: ['React', 'Sass', 'JavaScript', 'Figma', 'Webpack'],
-      achievements: [
-        'Improved client satisfaction by 95%',
-        'Created reusable component library',
-        'Optimized SEO performance'
-      ]
-    },
-    {
-      id: 5,
-      type: 'education',
-      title: 'Bachelor of Science in Information Technology',
-      company: 'State University',
-      location: 'Seattle, WA',
-      period: '2013 - 2017',
-      description: 'Foundation in computer science fundamentals, web development, and database systems. Active member of the Programming Club and participated in multiple hackathons. Graduated Magna Cum Laude.',
-      technologies: ['Java', 'C++', 'Web Development', 'Database Design', 'Networking'],
-      achievements: [
-        'Magna Cum Laude',
-        'Programming Club President',
-        'Won 3 hackathons'
-      ]
-    }
-  ];
+  const [items, setItems] = useState<ExperienceItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await apiService.getExperiences();
+        const mapped: ExperienceItem[] = data.map((e: ApiExperience) => ({
+          id: e.id,
+          type: 'work',
+          title: e.title,
+          company: e.company,
+          location: e.location || '',
+          period: `${new Date(e.startDate).getFullYear()} - ${e.current ? 'Present' : e.endDate ? new Date(e.endDate).getFullYear() : ''}`,
+          description: e.description,
+          technologies: (() => {
+            if (!e.technologies) return [];
+            try {
+              const parsed = JSON.parse(e.technologies as any);
+              if (Array.isArray(parsed)) return parsed.map((t) => String(t));
+              if (typeof parsed === 'string') return parsed.split(',').map((t) => t.trim()).filter(Boolean);
+            } catch {}
+            return String(e.technologies)
+              .split(',')
+              .map((t) => t.trim())
+              .filter(Boolean);
+          })(),
+        }));
+        setItems(mapped);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
 
   const stats = [
     { number: '5+', label: 'Years Experience', icon: Calendar },
@@ -222,7 +180,7 @@ const Experience: React.FC = () => {
           />
 
           <div className="space-y-12">
-            {experiences.map((exp, index) => (
+            {(loading ? [] : items).map((exp, index) => (
               <motion.div
                 key={exp.id}
                 variants={timelineVariants}

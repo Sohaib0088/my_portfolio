@@ -62,12 +62,12 @@ export const protect = async (
 
 // ✅ ADMIN MIDDLEWARE
 export const admin = (req: AuthRequest, res: Response, next: NextFunction) => {
-  console.log('🛡️ Admin Middleware Check - req.user:', req.user);
-
   if (req.user && req.user.role === 'admin') {
     return next();
   } else {
-    console.log('❌ Forbidden - User is not admin');
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('❌ Forbidden - User is not admin');
+    }
     return res.status(403).json({ success: false, error: 'Admin access required' });
   }
 }; 

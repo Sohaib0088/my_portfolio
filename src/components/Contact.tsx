@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { Mail, Phone, MapPin, Send, Github, Linkedin, Twitter, MessageCircle, CheckCircle, AlertCircle } from 'lucide-react';
+import { apiService } from '../services/api';
 
 const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -49,14 +50,16 @@ const Contact: React.FC = () => {
     if (!validateForm()) return;
     
     setIsSubmitting(true);
-    
-    // Simulate form submission
-    setTimeout(() => {
+    try {
+      await apiService.submitContact(formData);
       setIsSubmitting(false);
       setSubmitStatus('success');
       setFormData({ name: '', email: '', subject: '', message: '' });
       setTimeout(() => setSubmitStatus('idle'), 5000);
-    }, 2000);
+    } catch (err) {
+      setIsSubmitting(false);
+      setSubmitStatus('error');
+    }
   };
 
   const contactInfo = [

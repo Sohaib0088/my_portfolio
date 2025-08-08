@@ -34,7 +34,7 @@ async function main(): Promise<void> {
           title: 'E-Commerce Platform',
           description:
             'A full-stack e-commerce platform built with React, Node.js, and MongoDB. Features include user authentication, product management, shopping cart, and payment integration.',
-          imageUrl: '/uploads/project-ecommerce.jpg',
+          imageUrl: 'https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=1280&h=720&dpr=1',
           githubUrl: 'https://github.com/username/ecommerce-platform',
           liveUrl: 'https://ecommerce-platform.vercel.app',
           // Use Json type if schema allows; else keep JSON.stringify
@@ -54,7 +54,7 @@ async function main(): Promise<void> {
           title: 'Task Management App',
           description:
             'A collaborative task management application with real-time updates, drag-and-drop functionality, and team collaboration features.',
-          imageUrl: '/uploads/project-taskapp.jpg',
+          imageUrl: 'https://images.pexels.com/photos/574071/pexels-photo-574071.jpeg?auto=compress&cs=tinysrgb&w=1280&h=720&dpr=1',
           githubUrl: 'https://github.com/username/task-management',
           liveUrl: 'https://task-management-app.vercel.app',
           technologies: JSON.stringify([
@@ -73,7 +73,7 @@ async function main(): Promise<void> {
           title: 'Portfolio Website',
           description:
             'A modern, responsive portfolio website showcasing projects, skills, and experience with smooth animations and dark mode support.',
-          imageUrl: '/uploads/project-portfolio.jpg',
+          imageUrl: 'https://images.pexels.com/photos/1181275/pexels-photo-1181275.jpeg?auto=compress&cs=tinysrgb&w=1280&h=720&dpr=1',
           githubUrl: 'https://github.com/username/portfolio',
           liveUrl: 'https://portfolio-website.vercel.app',
           technologies: JSON.stringify([
@@ -170,7 +170,7 @@ async function main(): Promise<void> {
         title: 'About Me',
         content:
           'I am a passionate full-stack developer with over 5 years of experience building modern web applications. I specialize in React, TypeScript, and Node.js, and I love creating user-friendly, scalable solutions that solve real-world problems.',
-        imageUrl: '/uploads/profile.jpg',
+        imageUrl: 'https://images.pexels.com/photos/1181244/pexels-photo-1181244.jpeg?auto=compress&cs=tinysrgb&w=1280&h=720&dpr=1',
         order: 1,
       },
     });

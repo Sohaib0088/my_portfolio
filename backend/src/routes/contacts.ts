@@ -93,7 +93,7 @@ router.get('/:id', protect, async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Get contact error:', error);
     return res.status(500).json({ success: false, error: 'Server error' });
-  }
+    }
 });
 
 // Create a new contact

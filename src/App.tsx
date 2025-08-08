@@ -46,11 +46,17 @@ function App() {
         <>
           <Navigation onAdminClick={toggleAdmin} isLoggedIn={isLoggedIn} />
           <main>
+            {/* Home */}
             <Hero />
+            {/* About */}
             <About />
-            <Skills />
-            <Experience />
+            {/* Projects */}
             <Projects />
+            {/* Skills */}
+            <Skills />
+            {/* Experience */}
+            <Experience />
+            {/* Contact */}
             <Contact />
           </main>
           

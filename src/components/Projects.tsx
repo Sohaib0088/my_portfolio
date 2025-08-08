@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { ExternalLink, Github, ArrowRight, X, Play, Star } from 'lucide-react';
+import { apiService, Project as ApiProject } from '../services/api';
 
-interface Project {
+interface UIProject {
   id: number;
   title: string;
   description: string;
@@ -21,94 +22,72 @@ interface Project {
 }
 
 const Projects: React.FC = () => {
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [selectedProject, setSelectedProject] = useState<UIProject | null>(null);
   const [filter, setFilter] = useState('All');
+  const [projects, setProjects] = useState<UIProject[]>([]);
+  const [loading, setLoading] = useState(true);
   const ref = React.useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
-  const projects: Project[] = [
-    {
-      id: 1,
-      title: 'E-Commerce Platform',
-      description: 'Modern e-commerce solution with real-time inventory and Stripe integration.',
-      longDescription: 'A comprehensive e-commerce platform built with React and Node.js, featuring real-time inventory management, secure payment processing with Stripe, user authentication, and a responsive admin dashboard. The platform handles thousands of products and supports multiple payment methods.',
-      image: 'https://images.pexels.com/photos/230544/pexels-photo-230544.jpeg',
-      technologies: ['React', 'Node.js', 'MongoDB', 'Stripe', 'Socket.io'],
-      githubUrl: '#',
-      liveUrl: '#',
-      category: 'Full Stack',
-      featured: true,
-      stats: { stars: 124, forks: 45, views: '2.3k' }
-    },
-    {
-      id: 2,
-      title: 'AI Content Generator',
-      description: 'AI-powered tool for generating high-quality written content using advanced language models.',
-      longDescription: 'An innovative AI content generation platform that leverages OpenAI\'s GPT models to create high-quality written content. Features include content templates, tone adjustment, SEO optimization, and collaborative editing capabilities.',
-      image: 'https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg',
-      technologies: ['Next.js', 'OpenAI API', 'Tailwind CSS', 'Prisma', 'PostgreSQL'],
-      githubUrl: '#',
-      liveUrl: '#',
-      category: 'AI/ML',
-      featured: true,
-      stats: { stars: 89, forks: 23, views: '1.8k' }
-    },
-    {
-      id: 3,
-      title: 'Task Management App',
-      description: 'Collaborative task management with real-time updates and team features.',
-      longDescription: 'A comprehensive task management application with real-time collaboration features, drag-and-drop functionality, team workspaces, time tracking, and detailed analytics. Built for teams of all sizes.',
-      image: 'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg',
-      technologies: ['React', 'TypeScript', 'Socket.io', 'Express', 'PostgreSQL'],
-      githubUrl: '#',
-      liveUrl: '#',
-      category: 'Web App',
-      featured: false,
-      stats: { stars: 67, forks: 18, views: '1.2k' }
-    },
-    {
-      id: 4,
-      title: 'Fitness Tracking Mobile App',
-      description: 'Cross-platform mobile app for fitness tracking with social features.',
-      longDescription: 'A comprehensive fitness tracking application with workout plans, progress monitoring, social features, and integration with wearable devices. Includes nutrition tracking and personalized recommendations.',
-      image: 'https://images.pexels.com/photos/4753986/pexels-photo-4753986.jpeg',
-      technologies: ['React Native', 'Firebase', 'Redux', 'Charts.js'],
-      githubUrl: '#',
-      liveUrl: '#',
-      category: 'Mobile',
-      featured: false,
-      stats: { stars: 156, forks: 34, views: '3.1k' }
-    },
-    {
-      id: 5,
-      title: 'Data Visualization Dashboard',
-      description: 'Interactive dashboard for complex data visualization with real-time updates.',
-      longDescription: 'An advanced data visualization platform featuring interactive charts, real-time data streaming, customizable dashboards, and export capabilities. Perfect for business intelligence and analytics.',
-      image: 'https://images.pexels.com/photos/590020/pexels-photo-590020.jpeg',
-      technologies: ['D3.js', 'React', 'Express.js', 'WebSocket', 'MongoDB'],
-      githubUrl: '#',
-      liveUrl: '#',
-      category: 'Data Viz',
-      featured: true,
-      stats: { stars: 203, forks: 67, views: '4.2k' }
-    },
-    {
-      id: 6,
-      title: 'Real Estate Platform',
-      description: 'Comprehensive platform with property listings and virtual tours.',
-      longDescription: 'A full-featured real estate platform with property listings, virtual tours, mortgage calculator, agent matching system, and advanced search filters. Includes both web and mobile applications.',
-      image: 'https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg',
-      technologies: ['Vue.js', 'Python', 'Django', 'PostgreSQL', 'AWS'],
-      githubUrl: '#',
-      liveUrl: '#',
-      category: 'Full Stack',
-      featured: false,
-      stats: { stars: 78, forks: 29, views: '1.9k' }
-    }
-  ];
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await apiService.getProjects();
+        const demoImages = [
+          'https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&cs=tinysrgb&w=1280&h=720&dpr=1',
+          'https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=1280&h=720&dpr=1',
+          'https://images.pexels.com/photos/3861958/pexels-photo-3861958.jpeg?auto=compress&cs=tinysrgb&w=1280&h=720&dpr=1',
+          'https://images.pexels.com/photos/574071/pexels-photo-574071.jpeg?auto=compress&cs=tinysrgb&w=1280&h=720&dpr=1',
+          'https://images.pexels.com/photos/1181244/pexels-photo-1181244.jpeg?auto=compress&cs=tinysrgb&w=1280&h=720&dpr=1',
+          'https://images.pexels.com/photos/1181275/pexels-photo-1181275.jpeg?auto=compress&cs=tinysrgb&w=1280&h=720&dpr=1',
+        ];
+        const mapped: UIProject[] = data.map((p: ApiProject, idx: number) => ({
+          id: idx + 1,
+          title: p.title,
+          description: p.description,
+          longDescription: p.description,
+          image: (() => {
+            const apiBase = (import.meta.env.VITE_API_URL as string) || 'http://localhost:5000/api';
+            const base = apiBase.replace(/\/api$/, '');
+            const trimmed = (p.imageUrl || '').trim();
+            if (!trimmed) return demoImages[idx % demoImages.length];
+            if (trimmed.startsWith('/uploads/project-')) return demoImages[idx % demoImages.length];
+            if (trimmed.startsWith('http')) return trimmed;
+            return `${base}${trimmed.startsWith('/') ? trimmed : '/' + trimmed}`;
+          })(),
+          technologies: (() => {
+            try {
+              const parsed = JSON.parse(p.technologies as any);
+              if (Array.isArray(parsed)) return parsed.map((t) => String(t));
+              if (typeof parsed === 'string') return parsed.split(',').map((t) => t.trim()).filter(Boolean);
+            } catch {}
+            return (p.technologies || '')
+              .split(',')
+              .map((t) => t.trim())
+              .filter(Boolean);
+          })(),
+          githubUrl: p.githubUrl || '#',
+          liveUrl: p.liveUrl || '#',
+          category: 'Project',
+          featured: !!p.featured,
+          stats: { stars: 0, forks: 0, views: '—' },
+        }));
+        setProjects(mapped);
+      } catch (e) {
+        setProjects([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
 
-  const categories = ['All', 'Full Stack', 'AI/ML', 'Web App', 'Mobile', 'Data Viz'];
-  const filteredProjects = filter === 'All' ? projects : projects.filter(p => p.category === filter);
+  const categories = ['All', 'Project'];
+  const filteredProjects = filter === 'All'
+    ? projects
+    : filter === 'Featured'
+      ? projects.filter(p => p.featured)
+      : projects.filter(p => p.category === filter);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -121,14 +100,13 @@ const Projects: React.FC = () => {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: any = {
     hidden: { opacity: 0, y: 30 },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
         duration: 0.6,
-        ease: [0.6, -0.05, 0.01, 0.99]
       }
     }
   };
@@ -210,7 +188,11 @@ const Projects: React.FC = () => {
           className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
         >
           <AnimatePresence mode="wait">
-            {filteredProjects.map((project, index) => (
+            {loading ? (
+              <div className="col-span-full text-center text-gray-500 dark:text-gray-400">Loading projects...</div>
+            ) : filteredProjects.length === 0 ? (
+              <div className="col-span-full text-center text-gray-500 dark:text-gray-400">No projects found</div>
+            ) : filteredProjects.map((project) => (
               <motion.div
                 key={project.id}
                 variants={itemVariants}
@@ -219,9 +201,7 @@ const Projects: React.FC = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 whileHover={{ y: -10 }}
-                className={`group relative bg-white dark:bg-gray-900 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 ${
-                  project.featured ? 'md:col-span-2 lg:col-span-1' : ''
-                }`}
+                className={`group relative bg-white dark:bg-gray-900 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500`}
               >
                 {/* Featured Badge */}
                 {project.featured && (
@@ -234,11 +214,14 @@ const Projects: React.FC = () => {
                 )}
 
                 {/* Image Container */}
-                <div className="relative overflow-hidden h-64">
+                <div className="relative overflow-hidden h-64 bg-gray-100 dark:bg-gray-800">
                   <motion.img
                     src={project.image}
                     alt={project.title}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = 'https://via.placeholder.com/640x360?text=Project';
+                    }}
                   />
                   
                   {/* Overlay */}
@@ -287,7 +270,7 @@ const Projects: React.FC = () => {
 
                   {/* Technologies */}
                   <div className="flex flex-wrap gap-2 mb-6">
-                    {project.technologies.slice(0, 3).map((tech) => (
+                    {project.technologies.map((tech) => (
                       <span
                         key={tech}
                         className="px-3 py-1 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-xs font-medium rounded-full"
@@ -295,11 +278,6 @@ const Projects: React.FC = () => {
                         {tech}
                       </span>
                     ))}
-                    {project.technologies.length > 3 && (
-                      <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs font-medium rounded-full">
-                        +{project.technologies.length - 3}
-                      </span>
-                    )}
                   </div>
 
                   {/* Actions */}

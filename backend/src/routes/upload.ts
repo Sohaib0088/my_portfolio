@@ -6,7 +6,8 @@ import { protect, admin } from '../middleware/auth';
 
 const router = express.Router();
 
-// Create uploads directory if it doesn't exist
+// Create uploads directory if it doesn't exist (dist/uploads)
+// For TS build output (dist/src/routes -> dist/uploads), go two levels up
 const uploadDir = path.join(__dirname, '../../uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });

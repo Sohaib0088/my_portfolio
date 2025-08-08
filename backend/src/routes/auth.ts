@@ -112,7 +112,9 @@ router.post('/login', async (req: Request, res: Response) => {
     if (!isMatch) {
       return res.status(401).json({ success: false, error: 'Invalid credentials' });
     }
-    console.log('🔐 Logged-in user:', user);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('🔐 User logged in with password');
+    }
 
 
     const token = jwt.sign(
@@ -184,31 +186,27 @@ router.post('/request-otp', async (req: Request, res: Response) => {
     }
 
     // Generate 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpPlaintext = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    // Save OTP to database
+    // Hash OTP before storing
+    const otpHash = await bcrypt.genSalt(10).then((salt) => bcrypt.hash(otpPlaintext, salt));
+
+    // Save hashed OTP to database
     await prisma.oTP.create({
       data: {
         email,
-        otp,
+        otp: otpHash,
         expiresAt,
       },
     });
 
-    // Send OTP email
-    const emailSent = await sendOTPEmail(email, otp);
-    
-    // For development, always return success even if email fails
-    console.log('\n' + '='.repeat(50));
-    console.log(`🔐 OTP CODE FOR LOGIN 🔐`);
-    console.log(`Email: ${email}`);
-    console.log(`OTP: ${otp}`);
-    console.log(`Expires: ${new Date(Date.now() + 10 * 60 * 1000).toLocaleString()}`);
-    console.log('='.repeat(50) + '\n');
-    
-    if (!emailSent) {
-      console.log('⚠️ Email sending failed, but continuing for development');
+    // Send OTP email (only the recipient sees the code)
+    const emailSent = await sendOTPEmail(email, otpPlaintext);
+
+    if (!emailSent && process.env.NODE_ENV !== 'production') {
+      // Avoid leaking OTP in logs; only a generic warning in non-production
+      console.log('⚠️ OTP email sending failed in non-production');
     }
 
     // Send notification to admin email
@@ -217,7 +215,9 @@ router.post('/request-otp', async (req: Request, res: Response) => {
       try {
         await sendLoginNotification(adminEmail, email);
       } catch (error) {
-        console.log('⚠️ Admin notification failed, but continuing');
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('⚠️ Admin notification failed, but continuing');
+        }
       }
     }
 
@@ -240,11 +240,10 @@ router.post('/verify-otp', async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, error: 'Please provide email and OTP' });
     }
 
-    // Find the most recent valid OTP for this email
+    // Find the most recent valid OTP record for this email (hashed comparison later)
     const otpRecord = await prisma.oTP.findFirst({
       where: {
         email,
-        otp,
         expiresAt: { gt: new Date() },
         used: false,
       },
@@ -252,6 +251,12 @@ router.post('/verify-otp', async (req: Request, res: Response) => {
     });
 
     if (!otpRecord) {
+      return res.status(401).json({ success: false, error: 'Invalid or expired OTP' });
+    }
+
+    // Compare provided OTP with stored hash
+    const isOtpValid = await bcrypt.compare(otp, otpRecord.otp);
+    if (!isOtpValid) {
       return res.status(401).json({ success: false, error: 'Invalid or expired OTP' });
     }
 
@@ -278,7 +283,10 @@ router.post('/verify-otp', async (req: Request, res: Response) => {
       signOptions
     );
 
-    console.log('🔐 Logged-in user:', user);
+    if (process.env.NODE_ENV !== 'production') {
+      // Avoid logging sensitive details
+      console.log('🔐 User logged in via OTP');
+    }
 
     return res.json({
       success: true,

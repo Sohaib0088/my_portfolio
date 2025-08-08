@@ -1,52 +1,31 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { Code, Database, Wrench, Zap, Palette, Globe } from 'lucide-react';
+import { Code, Database, Wrench, Zap, Globe } from 'lucide-react';
+import { apiService, Skill as ApiSkill } from '../services/api';
 
 const Skills: React.FC = () => {
   const ref = React.useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
+  const [skills, setSkills] = useState<ApiSkill[]>([]);
+  const [loading, setLoading] = useState(true);
   const skillCategories = [
-    {
-      title: 'Frontend',
-      icon: Code,
-      color: 'from-blue-500 to-cyan-500',
-      skills: [
-        { name: 'React', level: 95, icon: '⚛️' },
-        { name: 'TypeScript', level: 90, icon: '🔷' },
-        { name: 'Next.js', level: 88, icon: '▲' },
-        { name: 'Vue.js', level: 82, icon: '💚' },
-        { name: 'Tailwind CSS', level: 95, icon: '🎨' },
-        { name: 'Framer Motion', level: 85, icon: '🎭' }
-      ]
-    },
-    {
-      title: 'Backend',
-      icon: Database,
-      color: 'from-green-500 to-emerald-500',
-      skills: [
-        { name: 'Node.js', level: 92, icon: '🟢' },
-        { name: 'Python', level: 88, icon: '🐍' },
-        { name: 'Express.js', level: 90, icon: '🚂' },
-        { name: 'Django', level: 82, icon: '🎸' },
-        { name: 'PostgreSQL', level: 87, icon: '🐘' },
-        { name: 'MongoDB', level: 85, icon: '🍃' }
-      ]
-    },
-    {
-      title: 'Tools & Cloud',
-      icon: Wrench,
-      color: 'from-purple-500 to-pink-500',
-      skills: [
-        { name: 'Docker', level: 85, icon: '🐳' },
-        { name: 'AWS', level: 80, icon: '☁️' },
-        { name: 'Git', level: 95, icon: '📚' },
-        { name: 'Figma', level: 90, icon: '🎨' },
-        { name: 'Jest', level: 88, icon: '🃏' },
-        { name: 'GraphQL', level: 78, icon: '📊' }
-      ]
-    }
+    { title: 'Frontend', icon: Code, color: 'from-blue-500 to-cyan-500' },
+    { title: 'Backend', icon: Database, color: 'from-green-500 to-emerald-500' },
+    { title: 'Tools & Cloud', icon: Wrench, color: 'from-purple-500 to-pink-500' }
   ];
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await apiService.getSkills();
+        setSkills(data);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
 
   const additionalSkills = [
     'Redux Toolkit', 'Zustand', 'Three.js', 'WebSocket', 'Redis', 'Prisma',
@@ -140,7 +119,7 @@ const Skills: React.FC = () => {
           animate={isInView ? "visible" : "hidden"}
           className="grid lg:grid-cols-3 gap-12 mb-20"
         >
-          {skillCategories.map((category, categoryIndex) => (
+              {skillCategories.map((category, categoryIndex) => (
             <motion.div
               key={category.title}
               variants={itemVariants}
@@ -156,11 +135,16 @@ const Skills: React.FC = () => {
                 </h3>
               </div>
               
-              {/* Skills List */}
-              <div className="space-y-6">
-                {category.skills.map((skill, skillIndex) => (
+                  {/* Skills List */}
+                  <div className="space-y-6">
+                    {(loading ? [] : skills.filter(s => {
+                      const cat = s.category.toLowerCase();
+                      if (category.title === 'Frontend') return cat.includes('front');
+                      if (category.title === 'Backend') return cat.includes('back') || cat.includes('server') || cat.includes('api');
+                      return !(cat.includes('front') || cat.includes('back'));
+                    })).map((skill, skillIndex) => (
                   <motion.div
-                    key={skill.name}
+                        key={skill.id}
                     variants={skillVariants}
                     initial="hidden"
                     animate={isInView ? "visible" : "hidden"}
@@ -169,15 +153,13 @@ const Skills: React.FC = () => {
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-3">
-                        <span className="text-2xl group-hover/skill:scale-110 transition-transform duration-300">
-                          {skill.icon}
-                        </span>
+                            <span className="text-2xl group-hover/skill:scale-110 transition-transform duration-300">{skill.icon || '🔧'}</span>
                         <span className="font-semibold text-gray-900 dark:text-white">
-                          {skill.name}
+                              {skill.name}
                         </span>
                       </div>
                       <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                        {skill.level}%
+                            {Math.round(((skill.level ?? 1) / 5) * 100)}%
                       </span>
                     </div>
                     
@@ -185,7 +167,7 @@ const Skills: React.FC = () => {
                       <motion.div
                         className={`absolute top-0 left-0 h-full bg-gradient-to-r ${category.color} rounded-full`}
                         initial={{ width: 0 }}
-                        animate={isInView ? { width: `${skill.level}%` } : { width: 0 }}
+                            animate={isInView ? { width: `${Math.round(((skill.level ?? 1) / 5) * 100)}%` } : { width: 0 }}
                         transition={{ 
                           duration: 1.5, 
                           delay: categoryIndex * 0.2 + skillIndex * 0.1 + 0.5,

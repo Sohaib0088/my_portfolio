@@ -38,7 +38,9 @@ export const sendOTPEmail = async (to: string, otp: string) => {
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`📧 OTP email sent to ${to}`);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`📧 OTP email sent to ${to}`);
+    }
     return true;
   } catch (error) {
     console.error('Email sending error:', error);
@@ -77,7 +79,9 @@ export const sendLoginNotification = async (to: string, userEmail: string, ipAdd
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`📧 Login notification sent to ${to}`);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`📧 Login notification sent to ${to}`);
+    }
     return true;
   } catch (error) {
     console.error('Email sending error:', error);

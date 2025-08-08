@@ -57,8 +57,8 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-// Static files
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// Static files (serve files saved by upload middleware)
+app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));
 
 // Routes
 app.use('/api/auth', authRoutes);
